@@ -1,32 +1,49 @@
 class Solution {
-public:
-    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
-         sort(candidates.begin(), candidates.end());
-       vector<vector<int>>res;
-       vector<int>comb;
-       makeCombinations(candidates,target,0,comb,res);
-       return res;
-
-    }
-     void makeCombinations(vector<int>& candidates, int target, int index, vector<int>& comb, vector<vector<int>>& res){
-        if(target==0){
-            res.push_back(comb);
+private:
+    vector<vector<int>> result;
+    
+    void backtrack(vector<int>& candidates, vector<int>& current, int target, int start) {
+        // Base case: if target becomes 0, we found a valid combination
+        if (target == 0) {
+            result.push_back(current);
             return;
         }
-        if(target<0){
+        
+        // Base case: if target becomes negative, this path is invalid
+        if (target < 0) {
             return;
         }
- for (int i = index;i<candidates.size();i++) {
-            if (i>index && candidates[i] == candidates[i-1]) {
+        
+        // Try all candidates starting from 'start' index
+        for (int i = start; i < candidates.size(); i++) {
+            // Skip duplicates at the same level to avoid duplicate combinations
+            if (i > start && candidates[i] == candidates[i-1]) {
                 continue;
             }
             
-            if (candidates[i] > target) {
-                break;
-            }
-             comb.push_back(candidates[i]);
-            makeCombinations(candidates, target - candidates[i], i + 1, comb, res);
-            comb.pop_back();
-     }
+            // Make choice: include candidates[i]
+            current.push_back(candidates[i]);
+            
+            // Recurse with updated target (can't reuse same element, so i+1)
+            backtrack(candidates, current, target - candidates[i], i + 1);
+            
+            // Backtrack: remove candidates[i]
+            current.pop_back();
+        }
+    }
+    
+public:
+    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
+        // Sort candidates to handle duplicates efficiently
+        sort(candidates.begin(), candidates.end());
+        
+        vector<int> current;
+        backtrack(candidates, current, target, 0);
+        return result;
     }
 };
+
+/*
+Time Complexity: O(2^n) where n is the length of candidates
+Space Complexity: O(n) for recursion stack
+*/ 
